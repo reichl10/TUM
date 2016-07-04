@@ -9,6 +9,11 @@
 #include "can/canframes/CANFrame.h"
 #include "can/ICANTransceiver.h"
 #include <stdio.h>
+#include <math.h>
+
+#define invalidVal 0x80000000
+#define noSig1 0x7FFFFFFF
+#define noSig2 0xFFFFFFFF
 
 using namespace can;
 
@@ -28,17 +33,27 @@ void GpsConverter::frameReceived(const CANFrame& canFrame)
 {
 	const uint8* payload = canFrame.getPayload();
     // TOOD implement conversion to arc-msec and call IGpsACPusher
+	sint32 latitude_raw = 0;
+	sint32 longitude_raw = 0;
 
-	sint32 latInMs = 0; // here add your converted lat
-	sint32 longInMs = 0; // here add your converted long
+	latitude_raw = payload[7] << 24 | payload[6] << 16 | payload[5] << 8 | payload[4];
+	longitude_raw = payload[3] << 24 | payload[2] << 16 | payload[1] << 8 | payload[0];
+	
+	if (latitude_raw != invalidVal && latitude_raw != noSig1 && latitude_raw != noSig1 &&
+		longitude_raw != invalidVal && longitude_raw != noSig1 && longitude_raw != noSig1) {
+
+		sint32 latInMs = ((180/((pow(2, 31))-1))*latitude_raw)*3600*1000;
+		sint32 longInMs = ((180*longitude_raw)/((pow(2, 31))-1)) *3600*1000;
 
 
-	if (latInMs != fLastLatInMs || longInMs != fLastLongInMs)
-	{
-		// value changed
-		fAcPusher.pushGPSCoordinates(latInMs, longInMs);
-		fLastLatInMs = latInMs;
-		fLastLongInMs = longInMs;
+
+		if (latInMs != fLastLatInMs || longInMs != fLastLongInMs)
+		{
+			// value changed
+			fAcPusher.pushGPSCoordinates(latInMs, longInMs);
+			fLastLatInMs = latInMs;
+			fLastLongInMs = longInMs;
+		}
 	}
 }
 

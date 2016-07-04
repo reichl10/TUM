@@ -1,0 +1,1 @@
+g++ -c -MD -MF build_main/src/main.d -Iinclude -o build_main/src/main.o src/main.cpp

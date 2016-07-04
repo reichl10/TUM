@@ -1,0 +1,1 @@
+g++ -o build_main/ppc.exe build_main/src/main.o

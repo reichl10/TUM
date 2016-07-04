@@ -1,0 +1,13 @@
+Project default: main {
+
+  Responsible {
+    Person "sebastian"
+  }
+
+  ExecutableConfig main {
+    # Dependency ...
+    Files "src/**/*.cpp"
+    IncludeDir "include"
+    DefaultToolchain GCC
+  }
+}
