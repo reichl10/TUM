@@ -14,6 +14,6 @@ public class CircleGeofence implements Geofence {
 
     @Override
     public boolean containsLocation(Location location) {
-        return false;
+        return this.center.distanceTo(location) <= radiusInMeters;
     }
 }

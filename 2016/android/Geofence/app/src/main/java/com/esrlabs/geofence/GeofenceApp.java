@@ -15,8 +15,6 @@ import android.util.Log;
 
 import com.esrlabs.headunitinterface.HeadUnit;
 
-import java.util.List;
-
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static com.esrlabs.geofence.Utils.location;
 
@@ -36,8 +34,14 @@ public class GeofenceApp extends Service implements LocationListener {
     public static final String TAG = "GeofenceApp";
 
     private LocationManager locationManager;
+    private LocationListener lListener;
     private Geofence geofence;
+    private HeadUnit huService;
 
+    public GeofenceApp(LocationManager manager, CircleGeofence fence){
+        this.locationManager = manager;
+        this.geofence = fence;
+    }
 
     @Override
     public void onCreate() {
@@ -60,6 +64,34 @@ public class GeofenceApp extends Service implements LocationListener {
         }
     }
 
+    private void initLocationListener(){
+        locationManager.requestLocationUpdates(locationManager.NETWORK_PROVIDER, 0, 0, this);
+    }
+
+    private void initHeadUnitService(){
+        ServiceConnection service;
+        service = new ServiceConnection(){
+
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                huService = HeadUnit.Stub.asInterface(iBinder);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                Log.e(TAG, "Service disconnected");
+                huService = null;
+            }
+        };
+        Intent headUnitServiceIntent = new Intent(HeadUnit.class.getName());
+        headUnitServiceIntent.setPackage("com.esrlabs.headunitservice");
+        bindService(headUnitServiceIntent, service, BIND_AUTO_CREATE);
+    }
+
+    public Location latestLocation(){
+        return this.locationManager.getLastKnownLocation(locationManager.NETWORK_PROVIDER);
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -67,7 +99,20 @@ public class GeofenceApp extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-
+        if (!geofence.containsLocation(location)){
+            try {
+                huService.showNotification("Out of boundaries!!");
+            } catch (RemoteException e) {
+                Log.e(TAG, "Display out-of-boundaries failed");
+            }
+        }
+        else{
+            try {
+                huService.hideAllNotifications();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Hiding notifications failed");
+            }
+        }
     }
 
     @Override

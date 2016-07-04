@@ -28,6 +28,8 @@ public class PolygonGeofence implements Geofence {
         List<Location> corners = new ArrayList<Location>(polygonPoints);
         corners.add(polygonPoints.get(0));
 
+
+
         return false;
     }
 
