@@ -28,9 +28,19 @@ public class PolygonGeofence implements Geofence {
         List<Location> corners = new ArrayList<Location>(polygonPoints);
         corners.add(polygonPoints.get(0));
 
+        boolean sections = false;
+        for (int i = 0; i < polygonPoints.size()-1; i++){
+            if (yBetweenPoints(polygonPoints.get(i),polygonPoints.get(i+1), location)){
+                sections = !sections;
+            }
+        }
 
+        return sections;
+    }
 
-        return false;
+    private boolean yBetweenPoints(Location e1, Location e2, Location center){
+        return ((e1.getLatitude() <= center.getLatitude()) && e2.getLatitude() >= center.getLatitude()) ||
+                ((e1.getLatitude() >= center.getLatitude()) && e2.getLatitude() <= center.getLatitude());
     }
 
 }
