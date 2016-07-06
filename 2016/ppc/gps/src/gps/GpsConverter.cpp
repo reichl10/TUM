@@ -39,8 +39,8 @@ void GpsConverter::frameReceived(const CANFrame& canFrame)
 	latitude_raw = payload[7] << 24 | payload[6] << 16 | payload[5] << 8 | payload[4];
 	longitude_raw = payload[3] << 24 | payload[2] << 16 | payload[1] << 8 | payload[0];
 	
-	if (latitude_raw != invalidVal && latitude_raw != noSig1 && latitude_raw != noSig1 &&
-		longitude_raw != invalidVal && longitude_raw != noSig1 && longitude_raw != noSig1) {
+	if (latitude_raw != invalidVal && latitude_raw != noSig1 && latitude_raw != noSig2 &&
+		longitude_raw != invalidVal && longitude_raw != noSig1 && longitude_raw != noSig2) {
 
 		sint32 latInMs = ((180/((pow(2, 31))-1))*latitude_raw)*3600*1000;
 		sint32 longInMs = ((180*longitude_raw)/((pow(2, 31))-1)) *3600*1000;
